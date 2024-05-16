@@ -1,0 +1,48 @@
+# Logs
+*.log
+npm-debug.log
+
+# Runtime data
+*.pid
+*.seed
+
+# Specific files
+*.dat
+*.out
+*.xml
+*.tgz
+
+# Editor files
+*.sublime-*
+*.swo
+*.swp
+.DS_Store
+
+# IDE files
+.idea/
+*.iml
+.project
+
+# StrongLoop
+.strong-pm
+
+# Coverage directory
+coverage/
+
+# Node modules
+node_modules/
+
+# Serverless
+.serverless
+serverless_local_*.yml
+
+# Local configuration files
+server/config.local.json
+server/datasources.local.json
+
+# Duplicates
+.idea
+.idea/*
+./.idea/workspace.xml
+./server/config.local.json
+./server/datasources.local.json

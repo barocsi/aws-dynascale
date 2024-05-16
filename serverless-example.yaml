@@ -1,0 +1,74 @@
+service: example-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-west-2
+  environment:
+    REQUESTED_INSTANCES: 1
+    CLUSTER_NAME: "example-cluster"
+    SERVICE_NAME: "example-api-server"
+    FARGATE_SERVICE_ENDPOINT: "http://example-balancer-1234567890.us-west-2.elb.amazonaws.com"
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "lambda:*"
+        - "ecs:*"
+        - "s3:*"
+        - "iam:*"
+      Resource: "*"
+
+functions:
+  scaleup:
+    handler: scaleup.handler
+    timeout: 300
+    name: scaleup
+    tags:
+      biz: example
+  teardown:
+    handler: teardown.handler
+    name: teardown
+    tags:
+      biz: example
+  runexampletask1:
+    handler: runtask.handler
+    name: runreporter
+    tags:
+      biz: example
+    environment:
+      TASK_DEFINITION_FAMILY: "example-api-reporter-task"
+      SUBNET_IDS: "subnet-12345678,subnet-87654321"
+      SECURITY_GROUP_IDS: "sg-12345678"
+  runexampletask2:
+    handler: runtask.handler
+    name: rundistancer
+    tags:
+      biz: example
+    environment:
+      TASK_DEFINITION_FAMILY: "example-api-distancer-task"
+      SUBNET_IDS: "subnet-12345678,subnet-87654321"
+      SECURITY_GROUP_IDS: "sg-12345678"
+
+resources:
+  Resources:
+    TeardownLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          Ref: "TeardownLambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "lambda.alarms.cloudwatch.amazonaws.com"
+    RunReporterLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          Ref: "RunreporterLambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "lambda.alarms.cloudwatch.amazonaws.com"
+    RunDistancerLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          Ref: "RundistancerLambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "lambda.alarms.cloudwatch.amazonaws.com"

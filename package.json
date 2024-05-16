@@ -1,0 +1,16 @@
+{
+  "name": "aws-dynascale",
+  "version": "1.0.0",
+  "description": "Dynamically scale up a certain service and tear it down using ClouDwatch triggers ",
+  "main": "src/scaleup.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aron Barocsi",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-ecs": "^3.514.0",
+    "axios": "^1.6.7",
+    "node-fetch": "^3.3.2"
+  }
+}

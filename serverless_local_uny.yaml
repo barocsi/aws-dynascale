@@ -1,0 +1,74 @@
+service: dynascale-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-central-1
+  environment:
+    REQUESTED_INSTANCES: 1
+    CLUSTER_NAME: "uny-live"
+    SERVICE_NAME: "uny-api-server"
+    FARGATE_SERVICE_ENDPOINT: "http://uny-balancer-1255927001.eu-central-1.elb.amazonaws.com"
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "lambda:*"
+        - "ecs:*"
+        - "s3:*"
+        - "iam:*"
+      Resource: "*"
+
+functions:
+  scaleup:
+    handler: scaleup.handler
+    timeout: 300
+    name: scaleup
+    tags:
+      biz: uny
+  teardown:
+    handler: teardown.handler
+    name: teardown
+    tags:
+      biz: uny
+  runreporter:
+    handler: runtask.handler
+    name: runreporter
+    tags:
+      biz: uny
+    environment:
+      TASK_DEFINITION_FAMILY: "uny-api-reporter-task"
+      SUBNET_IDS: "subnet-0b1ac675ef27f13d3,subnet-0cf06ac6225fc6240"
+      SECURITY_GROUP_IDS: "sg-03e06e68134fb0bd5"
+  rundistancer:
+    handler: runtask.handler
+    name: rundistancer
+    tags:
+      biz: uny
+    environment:
+      TASK_DEFINITION_FAMILY: "uny-api-distancer-task"
+      SUBNET_IDS: "subnet-0b1ac675ef27f13d3,subnet-0cf06ac6225fc6240"
+      SECURITY_GROUP_IDS: "sg-03e06e68134fb0bd5"
+
+resources:
+  Resources:
+    TeardownLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          Ref: "TeardownLambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "lambda.alarms.cloudwatch.amazonaws.com"
+    RunReporterLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          Ref: "RunreporterLambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "lambda.alarms.cloudwatch.amazonaws.com"
+    RunDistancerLambdaPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          Ref: "RundistancerLambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "lambda.alarms.cloudwatch.amazonaws.com"
